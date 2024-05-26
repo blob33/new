@@ -64,6 +64,79 @@ int main()
     return 0;
 }
 
+//Java
+import java.util.concurrent.Semaphore;
+
+public class Main {
+  
+  static Semaphore readLock = new Semaphore(1);
+  static Semaphore writeLock = new Semaphore(1);
+  static int readCount=0;
+  
+  static class Read implements Runnable{
+    
+    public void run(){
+      try{
+        
+        readLock.acquire();
+        readCount++;
+        if(readCount==0){
+          writeLock.acquire();
+        }
+        readLock.release();
+        
+        System.out.println("Thread " + Thread.currentThread().getName() +" is Reading");
+        Thread.sleep(1500);
+        System.out.println("Thread "+Thread.currentThread().getName() + " is finishing reading.");
+        
+        readLock.acquire();
+        readCount--;
+        if(readCount==0){
+          writeLock.release();
+        }
+        readLock.release();
+      }catch(Exception e){
+        System.out.println(e);
+      }  
+    }
+  }
+  
+  static class Write implements Runnable{
+    public void run(){
+      try{
+        writeLock.acquire();
+        System.out.println("Thread " + Thread.currentThread().getName() +" is Writing ");
+        Thread.sleep(1500);
+        System.out.println("Thread " + Thread.currentThread().getName() +" is finishing writing.");
+        writeLock.release();
+      }catch(Exception e){
+        System.out.println(e);
+      }
+    }
+  }
+  
+    public static void main(String[] args) {
+      
+      Read read = new Read();
+      Write write = new Write();
+      
+      Thread t1 = new Thread(read);
+      t1.setName("thread1");
+      Thread t2 = new Thread(read);
+      t2.setName("thread2");
+      Thread t3 = new Thread(write);
+      t3.setName("thread3");
+      Thread t4 = new Thread(read);
+      t4.setName("thread4");
+      
+      t1.start();
+      t2.start();
+      t3.start();
+      t4.start();
+      
+  }
+}
+
 // b. Producer-consumer
 
 // c.Dining-philosopher
@@ -116,6 +189,80 @@ void * philosopher(void * num){
 void eat(int phil){
 	printf("\nPhilosopher %d is eating",phil);
 }
+
+//Java
+import java.util.*;
+import java.util.concurrent.Semaphore;
+
+public class Main {
+  
+  public static final int philosophers = 5;
+  public static final Semaphore[] forks = new Semaphore[philosophers];
+  public static final Semaphore dineSema = new Semaphore(philosophers-1);
+  
+    public static void main(String[] args) {
+      
+      for(int i=0; i<philosophers;i++){
+        forks[i] = new Semaphore(1);
+      }
+      
+      Thread[] philo = new Thread[philosophers];
+      for(int i=0;i<philosophers;i++){
+        final int id = i;
+        philo[i] = new Thread(()-> dine(id));
+        philo[i].start();
+      }
+      
+      try{
+        for(Thread philos: philo){
+          philos.join();
+        }
+      }catch(Exception e){
+        System.out.println(e);
+      }
+  }
+  
+  static void dine(int philoId){
+    while(true){
+      think(philoId);
+      
+      try{
+        dineSema.acquire();
+        forks[philoId].acquire();
+        forks[(philoId+1)%philosophers].acquire();
+        
+        eat(philoId);
+        
+        forks[(philoId+1)%philosophers].release();
+        forks[philoId].release();
+        dineSema.release();
+      }catch(Exception e){
+        System.out.println(e);
+      }
+      
+    }
+  }
+  
+  public static void think(int id){
+    System.out.println("philosopher "+ id+" is thinking");
+    try {
+            Thread.sleep((long) (Math.random() * 1000));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+  }
+  
+  public static void eat(int id){
+    System.out.println("philosopher "+ id+" is eating");
+    try {
+            Thread.sleep((long) (Math.random() * 1000));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+  }
+  
+}
+
 
 // 2. Scheduling Algorithms
 // a.FCFS
