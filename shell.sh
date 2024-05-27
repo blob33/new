@@ -77,14 +77,16 @@ read num
 rem=0
 sum=0
 temp = $num
-
+rev=0
 while [ $num -gt 0 ];
 do
   rem=$(($num%10))
   num=$(($num/10))
+  rev=$(($rev*10)+$rem)
   sum=$(($sum+$rem))
 done
 
 echo "Sum of digits of $temp is: $sum"
 
-# 
+# palindrome
+
