@@ -1129,7 +1129,97 @@ int main()
 }
 
 // 6.Segmentation
+#include<stdio.h>
+
+struct Segments{
+    int baseAddress, segmentLimit;
+};
+void segmentation(){
+    int mainMemory[600];
+    int choice, segment, offset;
+    for(int i=0; i<600; i++){
+        mainMemory[i]=-1;
+    }
+    struct Segments DS={0, 149};
+    struct Segments CS={150, 149};
+    struct Segments SS={300, 149};
+    struct Segments ES={450, 149};
+
+    while(1){
+        printf("\n1. Store data.\n2. Retrieve Data.\nEnter Your Choice: ");
+        scanf("%d",&choice);
+        printf("\nSelect Segment { 1)CS, 2)DS, 3)SS, 4)ES} and enter its offset: ");
+        scanf("%d",&segment);
+        scanf("%d",&offset);
+        
+        if(offset<0 || offset>149){
+            printf("Invalid offset");
+            continue;
+        }
+
+        if(choice == 1){
+            int data;
+            printf("Enter Data to be Stored: ");
+            scanf("%d",&data);
+            if(segment == 1)
+                mainMemory[CS.baseAddress+offset] = data;
+            else if(segment == 2)
+                mainMemory[DS.baseAddress+offset] = data;
+            else if(segment == 3)
+                mainMemory[SS.baseAddress+offset] = data;
+            else if(segment == 4)
+                mainMemory[ES.baseAddress+offset] = data;
+            else
+                printf("Invalid Choice");
+        }
+        else if(choice == 2){
+            if(segment == 1)
+                printf("Data is:- %d",mainMemory[CS.baseAddress+offset]);
+            else if(segment == 2)
+                printf("Data is:- %d",mainMemory[DS.baseAddress+offset]);
+            else if(segment == 3)
+                printf("Data is:- %d",mainMemory[SS.baseAddress+offset]);
+            else if(segment == 4)
+                printf("Data is:- %d",mainMemory[ES.baseAddress+offset]);
+            else   
+                printf("Invalid Choice");
+        }
+        else
+            printf("Invalid Choice");
+    }
+}
+int main(){
+segmentation();
+}
+
 // 7.Paging
+#include <stdio.h>
+
+int  PAGE_SIZE = 4096;
+
+int translateAddress(int logical_address, int *page_table) {
+    int page_number = logical_address / PAGE_SIZE;
+    int offset = logical_address % PAGE_SIZE;
+    int frame_number = page_table[page_number];
+    int physical_address = (frame_number * PAGE_SIZE) + offset;
+    return physical_address;
+}
+
+int main() {
+    int page_table[4] = {2, 4, 1, 3}; 
+
+    int logical_address;
+    printf("Enter the logical address: ");
+    scanf("%d", &logical_address);
+
+    int physical_address = translateAddress(logical_address, page_table);
+
+    printf("Logical Address: %d\n", logical_address);
+    printf("Physical Address: %d\n", physical_address);
+
+    return 0;
+}
+
 
 // 8.Page Replacement
 // a. FIFO
